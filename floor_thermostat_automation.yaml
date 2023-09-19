@@ -33,4 +33,8 @@ blueprint:
     outside_temperature_below:
       name: Outside temperature
       description: Below this temperature thermostat will be set to selected mode
-      
+      selector:
+        number:
+          min: -10
+          max: 10
+          unit_of_measurement: C
