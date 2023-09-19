@@ -1,0 +1,36 @@
+blueprint:
+  name: Floor Thermostat Automation
+  description: Turn a thermostat on based on motion, presence and outside temperature
+  author: Algirdas C.
+  domain: automation
+  input:
+    thermostat:
+      name: Thermostat
+      description: Thermostat to control
+      selector:
+        entity:
+          domain: climate
+    thermostat_mode:
+      name: Mode
+      description: Mode to which thermostat will be set
+      selector:
+        select:
+          options:
+            - auto
+            - heat
+    motion_sensor:
+      name: Motion sensor
+      selector:
+        entity:
+          domain: binary_sensor
+          device_class: motion
+    outside_temperature_sensor:
+      name: Outside temperature sensor
+      selector:
+        entity:
+          domain: sensor
+          device_class: temperature
+    outside_temperature_below:
+      name: Outside temperature
+      description: Below this temperature thermostat will be set to selected mode
+      
