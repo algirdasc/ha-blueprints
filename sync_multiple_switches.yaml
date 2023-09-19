@@ -3,33 +3,40 @@ blueprint:
   description: Sync the On/Off status of 2 or more switches
   domain: automation
   input:
+    main_switch:
+      name: Main switch
+      selector:
+        entity:
     switch:
       name: Switches to Control
       selector:
         entity:
           multiple: true
-          domain: switch
+          domain:
+          - switch
+  source_url: https://raw.githubusercontent.com/algirdasc/ha-blueprints/main/sync_multiple_switches.yaml
 variables:
   switches: !input switch
+  main_switch: !input main_switch
 trigger:
-  - platform: state
-    entity_id: !input switch
-condition: 
-  - "{{ trigger.to_state.context.parent_id == none }}"
-  - "{{ trigger.to_state.state == 'on' or trigger.to_state.state == 'off' }}"
+- platform: state
+  entity_id: !input main_switch
+condition:
+- '{{ trigger.to_state.context.parent_id == none }}'
+- '{{ trigger.to_state.state == ''on'' or trigger.to_state.state == ''off'' }}'
 action:
-  - service_template: >
-      {% if trigger.to_state.state == 'on' %}
-      switch.turn_on
-      {% elif trigger.to_state.state == 'off' %}
-      switch.turn_off
-      {% endif %}
-    data_template: 
-      entity_id: >
-        {% set ts = namespace(switch=[]) %}
-        {% for sw in switches %}
-          {% if not is_state(sw,trigger.to_state.state) %}
-            {% set ts.switch = ts.switch + [sw] %}
-          {% endif %}
-        {% endfor %}
-        {{ ts.switch | list }}
+- service_template: >
+   {% if states(main_switch)== 'on' %}
+   switch.turn_on
+   {% elif states(main_switch) == 'off' %}
+   switch.turn_off
+   {% endif %}'
+  data_template:
+    entity_id: >
+      {% set ts = namespace(switch=[]) %}
+      {% for sw in switches %}
+        {% if not is_state(sw, states(main_switch)) %}
+          {% set ts.switch = ts.switch + [sw] %}
+        {% endif %}
+      {% endfor %}
+      {{ ts.switch | list }}
