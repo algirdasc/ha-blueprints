@@ -1,10 +1,11 @@
 blueprint:
   name: Floor Thermostat Automation
   description: Turn a thermostat on based on motion, presence and outside temperature
+  source_url: https://github.com/algirdasc/ha-blueprints/blob/main/floor_thermostat_automation.yaml
   author: Algirdas C.
   domain: automation
   input:
-    thermostat:
+    thermostat_entity:
       name: Thermostat
       description: Thermostat to control
       selector:
@@ -18,13 +19,13 @@ blueprint:
           options:
             - auto
             - heat
-    motion_sensor:
+    motion_sensor_entity:
       name: Motion sensor
       selector:
         entity:
           domain: binary_sensor
           device_class: motion
-    outside_temperature_sensor:
+    outside_temperature_sensor_entity:
       name: Outside temperature sensor
       selector:
         entity:
@@ -38,3 +39,54 @@ blueprint:
           min: -10
           max: 10
           unit_of_measurement: C
+    home_presence_entity:
+      name: Home presence entity
+      description: Entity that states when you are home
+      selector:
+        entity:
+    home_presence_state:
+      name: Home presence state
+      description: State, which states when you are home
+      selector:
+        text:
+
+mode: restart
+
+trigger:
+  - platform: state
+    entity_id: !input home_presence_entity
+    to: null 
+  - platform: numeric_state
+    entity_id: !input outside_temperature_sensor_entity
+    below: !input outside_temperature_below
+condition: []
+action:
+  - if:
+    - condition: and
+      conditions:
+        - condition: state
+          entity_id: !input home_presence_entity
+          state: !input home_presence_state
+        - condition: numeric_state
+          entity_id: !input outside_temperature_sensor_entity
+          below: !input outside_temperature_below
+    then:
+      - wait_for_trigger:
+          - platform: state
+            entity_id: !input motion_sensor_entity
+            to: "on"
+      - service: climate.set_hvac_mode
+        data:
+          hvac_mode: !input thermostat_mode
+        target:
+          entity_id: !input thermostat_entity
+    else:
+      - if:
+        - condition: state
+          entity_id: !input thermostat_entity
+          state: !input thermostat_mode
+        then:
+          - service: climate.turn_off
+            data: {}
+            target:
+              entity_id: !input thermostat_entity
