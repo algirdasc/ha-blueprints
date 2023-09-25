@@ -1,6 +1,6 @@
 blueprint:
   name: Turn off switch when no motion detected
-  source_url: https://gist.github.com/cobryan05/24f19bad93b642b7e0c5f8f1da0515d0
+  source_url: https://raw.githubusercontent.com/algirdasc/ha-blueprints/main/turn_off_switch_without_motion.yaml
   description: Turn off a switch/light that has been left on with no motion
   domain: automation
   input:
